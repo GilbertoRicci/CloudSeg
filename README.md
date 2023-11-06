@@ -2,17 +2,18 @@
 Clouds semantic segmentation in horizontal sky images
 
 # Requirements
-python                    3.10.11
-paddleseg                 2.8.0
-ffmpeg                    4.3.1
-numpy                     1.24.3
-opencv-python             4.5.5.64
+* python 3.10.11
+* paddleseg 2.8.0
+* ffmpeg 4.3.1
+* numpy 1.24.3
+* opencv-python 4.5.5.64
 
 # Usage
-cloudseg.py [-h] -d DATASET_DIR -i INF_OUT_DIR [-s] -p PS_ROOT_DIR -m MODEL_YAML -v VIDEO_FILE_PATH
-                   [-f VIDEO_FRAME_DUR] [-o] [-a ANNOTATION_ALPHA] [-c FOURCC_STRING]
-                   
+```
+cloudseg.py [-h] -d DATASET_DIR -i INF_OUT_DIR [-s] -p PS_ROOT_DIR -m MODEL_YAML -v VIDEO_FILE_PATH [-f VIDEO_FRAME_DUR] [-o] [-a ANNOTATION_ALPHA] [-c FOURCC_STRING]
+```                 
 # Options
+```
   -h, --help            show this help message and exit
   -d DATASET_DIR, --dataset_dir DATASET_DIR
                         Dataset directory
@@ -33,4 +34,5 @@ cloudseg.py [-h] -d DATASET_DIR -i INF_OUT_DIR [-s] -p PS_ROOT_DIR -m MODEL_YAML
   -a ANNOTATION_ALPHA, --annotation_alpha ANNOTATION_ALPHA
                         Annotation alpha: value from 0.0 (opaque) to 1.0 (full transparend) (for annotated original image only)
   -c FOURCC_STRING, --fourcc_string FOURCC_STRING
-                        FourCC video codec code 
+                        FourCC video codec code
+``` 
