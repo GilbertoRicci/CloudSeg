@@ -11,12 +11,13 @@ parser.add_argument("-d", "--dataset_dir", required=True, help="Dataset director
 parser.add_argument("-i", "--inf_out_dir", required=True, help="Inference output directory")
 parser.add_argument("-s", "--run_segmentation", action='store_true', help="Run segmentation or just read inference folder annotations")
 parser.add_argument("-p", "--ps_root_dir", required=True, help="PaddleSeg root path") 
-parser.add_argument("-m", "--model_yaml", required=True, help="PPLiteSeg model YAML path")   
-parser.add_argument("-v", "--video_file_path", required=True, help="Video output file path")  
+parser.add_argument("-m", "--model_yaml", required=True, help="PPLiteSeg model YAML path")
+parser.add_argument("-v", "--video_file_path", required=True, help="Video output file path")
 parser.add_argument("-f", "--video_frame_dur", default=3.0, help="Video frame duration (in seconds)")
 parser.add_argument("-o", "--only_annotation", action='store_true', help="Video w/ annotation only or annotated original image")
-parser.add_argument("-a", "--annotation_alpha", default=0.4, help="Annotation alpha: value from 0.0 (opaque) to 1.0 (full transparend) (for annotated original image only)")   
-parser.add_argument("-c", "--fourcc_string", default="mp4v", help="FourCC video codec code")    
+parser.add_argument("-a", "--annotation_alpha", default=0.4, help="Annotation alpha: value from 0.0 (opaque) to 1.0 (full transparend) (for annotated original image only)") 
+parser.add_argument("-c", "--fourcc_string", default="mp4v", help="FourCC video codec code")
+parser.add_argument("-g", "--generate_images", action="store_true", help="Generate image sequences instead of videos")
 args = parser.parse_args()
 
 dataset_dir = Path(args.dataset_dir)
@@ -30,6 +31,7 @@ only_annotation = args.only_annotation
 annotation_alpha = float(args.annotation_alpha)
 annotation_alpha = float(args.annotation_alpha)
 fourcc_string = args.fourcc_string
+not_video = args.generate_images
 
 # constantes
 
@@ -90,8 +92,8 @@ def vetor_predominante_componente(fluxo, num_comp, comps):
     idx_px_nuvens_x = idx_px_nuvens_x[np.where((idx_px_nuvens_x >= 0) | (idx_px_nuvens_x < img_width))]
 
     # obtem vetor médio dentre vetores dos pixels da nuvem
-    vetor_y = fluxo[idx_px_nuvens_y, idx_px_nuvens_x, 0].mean()
-    vetor_x = fluxo[idx_px_nuvens_y, idx_px_nuvens_x, 1].mean()
+    vetor_y = fluxo[idx_px_nuvens_y, idx_px_nuvens_x, 1].mean()
+    vetor_x = fluxo[idx_px_nuvens_y, idx_px_nuvens_x, 0].mean()
     
     # retorna vetor em coordenadas polares
     mag, ang = cv2.cartToPolar(vetor_x.item(), vetor_y.item())
@@ -162,7 +164,6 @@ def calcula_cores_fundo_seta(cor_tipo, magnitude):
     return cor_mag, cor_seta
 
 def obter_img_bgr(img, num_componentes, componentes_img, vetores_img, max_mag):
-    #img_base = np.zeros((img_height, img_width, 3)) # futura imagem com nuvnes/setas
     img_base = np.zeros((img_height, img_width, 3), dtype=np.uint8) # futura imagem com nuvnes/setas
 
     # para cada nuvem (componente conexa) da imagem... 
@@ -174,9 +175,11 @@ def obter_img_bgr(img, num_componentes, componentes_img, vetores_img, max_mag):
             # se nao houver vetor, pinta imagem sem seta
             pintura = hsl_arr_to_bgr(cor_tipo)
         else:
+            mag, ang = tuple(vetores_img[num_comp-1])
+            
             # se houver vetor, pinta imagem com seta
-            cor_fundo, cor_seta = calcula_cores_fundo_seta(cor_tipo, vetores_img[num_comp-1][0])
-            setas = criar_img_setas(vetores_img[num_comp-1, 1], cor_seta, cor_fundo)
+            cor_fundo, cor_seta = calcula_cores_fundo_seta(cor_tipo, mag)
+            setas = criar_img_setas(ang, cor_seta, cor_fundo)
             pintura = setas[pxs_componente]
             
         img_base[pxs_componente] = pintura # pinta pixels de interesse
@@ -241,12 +244,16 @@ print("OK")
 # Gera video
 print("Generating video... ", end=" ")
 frames = len(imgs)
-fps = 30
-fourcc = cv2.VideoWriter_fourcc(*fourcc_string)
-video = cv2.VideoWriter(str(video_file_path), fourcc, fps, (img_width, img_height))
-for f in range(frames):
-    for i in range(int(fps * frame_duration)):
-        video.write(color_imgs[f])
-video.release()
+if not_video:
+    for f in range(frames):
+        cv2.imwrite(str(video_file_path / f"frame{f}.png"), color_imgs[f])
+else:
+    fps = 30
+    fourcc = cv2.VideoWriter_fourcc(*fourcc_string)
+    video = cv2.VideoWriter(str(video_file_path), fourcc, fps, (img_width, img_height))
+    for f in range(frames):
+        for i in range(int(fps * frame_duration)):
+            video.write(color_imgs[f])
+    video.release()
 print("OK")
 print("Finished!")
