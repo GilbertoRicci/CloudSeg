@@ -35,4 +35,6 @@ cloudseg.py [-h] -d DATASET_DIR -i INF_OUT_DIR [-s] -p PS_ROOT_DIR -m MODEL_YAML
                         Annotation alpha: value from 0.0 (opaque) to 1.0 (full transparend) (for annotated original image only)
   -c FOURCC_STRING, --fourcc_string FOURCC_STRING
                         FourCC video codec code
+  -g GENERATE_IMAGES, --generate_images GENERATE_IMAGES
+                        Generate image sequences instead of videos
 ``` 
